@@ -1,10 +1,5 @@
-#from __future__ import print_function
 import random
-"""
-def parseData(fname):
-  for l in urllib.urlopen(fname):
-     yield eval(l)
-"""
+import string
 
 def currWordFormat(status):
     currWord = ""
@@ -35,28 +30,18 @@ def progress(word, status, selection):
 def isWin(status):
     return not "_" in status
 
-def retrieve_input():
+def retrieve_input(possible_ans):
     selection = raw_input("Enter your guess here: ")
-    selection = selection.lower()
+    selection = selection.upper()
     error_flag = True
     while(error_flag):
-       if len(selection) != 1:
-          print "Guess should be 1 character only"
-	  error_flag = True
-	  
-       else:
-           error_flag = False
-
-       if not selection.isalpha():
-          print "Guess should be a letter"
-	  error_flag = True
-      
-       elif not error_flag:
-           error_flag = False
-       
-       if error_flag:
+       if not selection in possible_ans:
+          print "Selection is not a valid one"
           selection = raw_input("Enter your guess here: ")
-	  selection = selection.lower()
+	  selection = selection.upper()
+       
+       else:
+          error_flag = False
     
     assert(len(selection) == 1 and selection.isalpha())
     return selection
@@ -68,16 +53,20 @@ for line in myfile:
 	listNames.append(line[:len(line)-2])
 
 num = random.randint(0, len(listNames)-1)
-wordChosen = listNames[num].lower()
+wordChosen = listNames[num].upper()
 game_status = initialization(wordChosen)
+chars_available   = list(string.uppercase)
 
 print currWordFormat(game_status)
+print "Available Options:"
+print chars_available
+
 while(not isWin(game_status)):
-    chosen_char = retrieve_input()
+    chosen_char = retrieve_input(chars_available)
+    chars_available.remove(chosen_char)
     game_status = progress(wordChosen, game_status, chosen_char)
     print currWordFormat(game_status)
+    print "Available Options:"
+    print chars_available
 
 print "End of game"
-#print listNames[num]
-#print len(listNames[num])
-#print printCurrWord(listNames[num])

@@ -1,0 +1,13 @@
+"""
+print "   __________"
+print "   |        |"
+print "   |        |"
+print "   |        O"
+print "   |       /|\\"
+print "   |       / \\"
+print "   |"
+print "   |"
+print "___|_____"
+"""
+mystr = "   __________\n   |        |\n   |        |\n   |        O\n   |       /|\\\n   |       / \\\n   |\n   |\n___|_____\n"
+print mystr
