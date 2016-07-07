@@ -1,5 +1,51 @@
 import random
 import string
+from image_steps import images_steps
+
+
+def select_topic():
+    dictList = ["Animals", "Countries", "Names"]
+    print "     Topics Available: "
+    for elem in dictList:
+        print "          " + elem
+    topic = raw_input("Select the topic of your preference: ")
+    
+    while not topic in dictList:
+       topic = raw_input("Sorry, I didn't get your option, write it again: ").lower()
+    return topic.lower()
+
+def setting_speed_mode():
+    difficulty = raw_input("Select the difficulty of gallow building speed:\n Easy   Medium   Hard\n\n")
+    difficulty = difficulty.lower()
+    possible_opt = {"easy":1, "medium":2, "hard":3}
+    while not difficulty in possible_opt:
+       difficulty = raw_input("Sorry, I didn't get your option, write it again: ").lower()
+    return possible_opt[difficulty]
+
+def setting_word_mode(max_length):
+    difficulty = raw_input("Select the difficulty of word:\n Easy   Medium   Hard\n\n")
+    difficulty = difficulty.lower()
+    first_bound  = (max_length / 3) 
+    second_bound = 2 * first_bound
+    possible_opt = {"easy":range(0,first_bound), "medium":range(first_bound,second_bound), "hard":range(second_bound, max_length)}
+    while not difficulty in possible_opt:
+       difficulty = raw_input("Sorry, I didn't get your option, write it again: ").lower()
+    return possible_opt[difficulty]
+
+def selecting_word(options,difficulty):
+    index = random.randint(0, len(options) -1)
+    while not len(options[index]) in difficulty:
+        index = random.randint(0, len(options)-1)
+    return options[index]
+
+def starting_pt(step, max_range):
+#    assert step == 2 
+#    assert max_range == 10
+    initial_pt = max_range
+    while initial_pt >= step:
+        initial_pt -= step
+#    assert initial_pt == 0
+    return initial_pt
 
 def currWordFormat(status):
     currWord = ""
@@ -45,28 +91,52 @@ def retrieve_input(possible_ans):
     
     assert(len(selection) == 1 and selection.isalpha())
     return selection
-       
 
-myfile = open("countries.txt", 'r')
+def update_errors(ch, word, errors, step):
+    if not ch in word:
+       errors += step
+    return errors
+
+def isLost(errors, max_errors):
+    return errors == max_errors
+
+print "Welcome to Hangout"
+mytopic = select_topic()
+myfile = open("dictionaries/"+ mytopic + ".txt", 'r')
+max_length = 0
 listNames = []
 for line in myfile:
-	listNames.append(line[:len(line)-2])
+        currWord = line.split('\r\n')[0]
+	listNames.append(currWord)
+	max_length = max(max_length, len(currWord))
 
-num = random.randint(0, len(listNames)-1)
-wordChosen = listNames[num].upper()
+factor = setting_speed_mode()
+word_factor = setting_word_mode(max_length)
+#num = random.randint(0, len(listNames)-1)
+wordChosen = selecting_word(listNames, word_factor).upper()
 game_status = initialization(wordChosen)
 chars_available   = list(string.uppercase)
+num_errors = starting_pt(factor, len(images_steps) - 1)
 
-print currWordFormat(game_status)
+print currWordFormat(game_status) 
+print images_steps[num_errors]
 print "Available Options:"
-print chars_available
+print str(chars_available) 
 
-while(not isWin(game_status)):
+while not isWin(game_status) and not isLost(num_errors, len(images_steps)-1):
     chosen_char = retrieve_input(chars_available)
     chars_available.remove(chosen_char)
     game_status = progress(wordChosen, game_status, chosen_char)
-    print currWordFormat(game_status)
+    num_errors  = update_errors(chosen_char, wordChosen, num_errors, factor)
+    print currWordFormat(game_status) 
+    print images_steps[num_errors]
     print "Available Options:"
     print chars_available
 
-print "End of game"
+if isWin(game_status):
+    print "Congratulations, you win"
+
+else:
+    print "Sorry, you went to the gallow"
+    print "The word was: " + wordChosen
+    print "GAME OVER"
